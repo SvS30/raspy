@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  samba:
+    image: dperson/samba:rpi # Imagen exclusiva para raspberry's
+    restart: always
+    command: '-u ${user};${pass}" -s "media;/samba/media;yes;no" -s "docs;/samba/docs;yes;no"'
+    stdin_open: true
+    tty: true
+    environment:
+      - TZ=America/Mexico_City
+    ports:
+      - 139:139
+      - 445:445
+    volumes:
+      - ${MEDIA_SAMBA}:/samba/media
+      - ${DOCS_SAMBA}:/samba/docs
+  plex:
+    image: jaymoulin/plex:1.30.1.6562
+    restart: unless-stopped
+    environment:
+      - TZ=America/Mexico_City
+    expose:
+      - 32400
+      - 33400
+    volumes:
+      - ${STORAGE_PLEX}/Plex Media Server:/root/Library/Application Support/Plex Media Server
+      - ${MEDIA_SAMBA}:/samba/media
+    network_mode: "host"
